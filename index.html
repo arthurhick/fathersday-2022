@@ -35,9 +35,12 @@
         )
         camera.position.set(0, 0, -10)
 
-        let frontTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/front.png')
-        let insideTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/inside.png')
-        let blankTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/blank.png')
+        let frontTexture = new THREE.TextureLoader().load(
+            'https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/front.png')
+        let insideTexture = new THREE.TextureLoader().load(
+            'https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/inside.png')
+        let blankTexture = new THREE.TextureLoader().load(
+            'https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/blank.png')
         let scale = .025
 
         let front = new THREE.Mesh(
@@ -62,8 +65,30 @@
             })
         )
         scene.add(front, blank, inside)
-
         camera.lookAt(front.position);
+
+        // create an AudioListener and add it to the camera
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+
+        let sound = {}
+
+        // create a global audio source
+        sound.yippee = new THREE.Audio(listener);
+        sound.confetti = new THREE.Audio(listener);
+
+        // load a sound and set it as the Audio object's buffer
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/yippee.mp3', function (buffer) {
+            sound.yippee.setBuffer(buffer);
+            sound.yippee.setLoop(false);
+            sound.yippee.setVolume(0.5);
+        });
+        audioLoader.load('https://raw.githubusercontent.com/arthurhick/fathersday-2022/main/confetti.mp3', function (buffer) {
+            sound.confetti.setBuffer(buffer);
+            sound.confetti.setLoop(false);
+            sound.confetti.setVolume(0.5);
+        });
 
         let clicked = false
         document.body.addEventListener('click', () => {
@@ -85,9 +110,13 @@
                     })
                 }, 1);
                 setTimeout(() => {
+                    sound.yippee.play();
+                    sound.confetti.play();
                     clearInterval(interval)
                     setInterval(() => {
-                        party.confetti(document.body, {count: party.variation.range(1, 10)});
+                        party.confetti(document.body, {
+                            count: party.variation.range(1, 10)
+                        });
                     }, 100);
                 }, 1500);
             }
