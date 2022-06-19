@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise!</title>
+    <script src="https://cdn.jsdelivr.net/npm/party-js@latest/bundle/party.min.js"></script>
+</head>
+
+<body style="background: white">
+
+</body>
+<script src="https://cdn.jsdelivr.net/gh/asanull/engine.js/engine.js"></script>
+<script>
+    engine.js().then(() => {
+        let scene = new THREE.Scene() // create a new scene
+
+        let aspect = window.innerWidth / window.innerHeight;
+        let d = 20;
+        let camera = new THREE.OrthographicCamera(
+            -d * aspect, // left, right, top, bottom, near, far
+            d * aspect,
+            d,
+            -d,
+            1,
+            1000
+        )
+
+        engine.load(scene, 'myScene') // load the scene into the engine
+        engine.load( // add the perspective camera to the scene
+            camera,
+            'OrthographicCamera'
+        )
+        camera.position.set(0, 0, -10)
+
+        let frontTexture = new THREE.TextureLoader().load('front.png')
+        let insideTexture = new THREE.TextureLoader().load('inside.png')
+        let blankTexture = new THREE.TextureLoader().load('blank.png')
+        let scale = .025
+
+        let front = new THREE.Mesh(
+            new THREE.PlaneGeometry(570 * scale, 847 * scale),
+            new THREE.MeshBasicMaterial({
+                map: frontTexture
+            })
+        )
+        front.rotation.y = 185.5
+        let inside = new THREE.Mesh(
+            new THREE.PlaneGeometry(570 * scale, 847 * scale),
+            new THREE.MeshBasicMaterial({
+                map: insideTexture
+            })
+        )
+        inside.rotation.y = 185.5
+        inside.position.z += .5
+        let blank = new THREE.Mesh(
+            new THREE.PlaneGeometry(570 * scale, 847 * scale),
+            new THREE.MeshBasicMaterial({
+                map: blankTexture
+            })
+        )
+        scene.add(front, blank, inside)
+
+        camera.lookAt(front.position);
+
+        let clicked = false
+        document.body.addEventListener('click', () => {
+            if (!clicked) {
+                clicked = true
+                let interval = setInterval(() => {
+                    front.position.x += .0425
+                    front.rotation.y += .01075
+                    blank.position.x += .0425
+                    blank.rotation.y += .01075
+                    inside.position.z -= .025
+                    blank.position.z += .025
+
+                    // foreach child in scene
+                    scene.children.forEach(child => {
+                        if (child.type === 'Mesh') {
+                            child.position.x -= .0425 / 2
+                        }
+                    })
+                }, 1);
+                setTimeout(() => {
+                    clearInterval(interval)
+                    setInterval(() => {
+                        party.confetti(document.body, {count: party.variation.range(1, 10)});
+                    }, 100);
+                }, 1500);
+            }
+        })
+    })
+</script>
+
+</html>
